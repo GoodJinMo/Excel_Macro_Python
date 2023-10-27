@@ -90,54 +90,40 @@ class  NM_main(QMainWindow):
          self.c = self.table_widget.currentIndex().column()
          self.col = self.table_widget.currentColumn()
          col_header = self.table_widget.horizontalHeaderItem(self.col).text()
-         
-         if self.state ==1:
-             for row in range(self.table_widget.rowCount()):
-                 if self.current[0] !=-1:
-                     item = self.table_widget.item( row,self.current[0])
+         state=self.state-1
+         for row in range(self.table_widget.rowCount()):
+                 if self.current[state] !=-1:
+                     item = self.table_widget.item( row,self.current[state])
                      item.setBackground(QColor(255, 255, 255))
              for row in range(self.table_widget.rowCount()):
                  item = self.table_widget.item(row,self.c)
                  item.setBackground(QColor(255, 0, 0)) 
-             self.current[0] = self.c
-             self.cn[0]=col_header
-             self.state_name.setText("Max: "+chr(self.current[0]+65))
+             self.current[state] = self.c
+             self.cn[state]=col_header
+             self.state_name.setText("Max: "+chr(self.current[state]+65))
+        
+         if self.state ==1:
+             for row in range(self.table_widget.rowCount()):
+                 item = self.table_widget.item(row,self.c)
+                 item.setBackground(QColor(255, 0, 0)) 
+                 
          if self.state ==2:
-            for row in range(self.table_widget.rowCount()):
-                if self.current[1] !=-1:
-                    item = self.table_widget.item( row,self.current[1])
-                    item.setBackground(QColor(255, 255, 255))
             for row in range(self.table_widget.rowCount()):
                 item = self.table_widget.item(row,self.c)
                 item.setBackground(QColor(0, 255, 0)) 
-            self.current[1] = self.c 
-            self.cn[1]=col_header
-            self.state_name.setText("Max: "+chr(self.current[1]+65))
             
          if self.state ==3:
             for row in range(self.table_widget.rowCount()):
-                if self.current[2] !=-1:
-                    item = self.table_widget.item( row,self.current[2])
-                    item.setBackground(QColor(255, 255, 255))
-            for row in range(self.table_widget.rowCount()):
                 item = self.table_widget.item(row,self.c)
                 item.setBackground(QColor(0, 0, 255)) 
-            self.current[2] = self.c 
             self.state=4
             self.state_name.setText("range_e")
-            self.cn[2]=col_header
-            self.state_name.setText("Max: "+chr(self.current[2]+65))
             
          if self.state ==4:
            for row in range(self.table_widget.rowCount()):
-               if self.current[3] !=-1:
-                   item = self.table_widget.item( row,self.current[3])
-                   item.setBackground(QColor(255, 255, 255))
-           for row in range(self.table_widget.rowCount()):
                 item = self.table_widget.item(row,self.c)
                 item.setBackground(QColor(0, 0, 255)) 
-           self.current[3] = self.c
-           self.cn[3]=col_header
+           self.state =3
            self.state_name.setText("range_s")
     def openDialog(self):
          dialog = Show_ex(self.path_input.text())
