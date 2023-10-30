@@ -64,6 +64,7 @@ class  NM_main(QMainWindow):
         
         self.MC=None
         self.state=0
+        self.start=None
         self.current=[-1,-1,-1,-1]
         self.cn=[None,None,None,None]
     def btn_max(self):
@@ -89,42 +90,52 @@ class  NM_main(QMainWindow):
          self.row = self.table_widget.currentIndex().row()
          self.c = self.table_widget.currentIndex().column()
          self.col = self.table_widget.currentColumn()
+         
          col_header = self.table_widget.horizontalHeaderItem(self.col).text()
          state=self.state-1
+         print(state,self.current[state])
          for row in range(self.table_widget.rowCount()):
-                 if self.current[state] !=-1:
-                     item = self.table_widget.item( row,self.current[state])
-                     item.setBackground(QColor(255, 255, 255))
-             for row in range(self.table_widget.rowCount()):
-                 item = self.table_widget.item(row,self.c)
-                 item.setBackground(QColor(255, 0, 0)) 
-             self.current[state] = self.c
-             self.cn[state]=col_header
-             self.state_name.setText("Max: "+chr(self.current[state]+65))
+             if self.current[state] != -1:
+                 item = self.table_widget.item( row,self.current[state])
+                 item.setBackground(QColor(255, 255, 255))
+         if self.state == 3:
+            if self.current[3] != -1:
+                for row in range(self.table_widget.rowCount()):
+                    for ra in range(self.current[2],self.current[3]+1):
+                     item = self.table_widget.item(row,ra)
+                     item.setBackground(QColor(255, 255, 255))  
+         self.current[state] = self.c
+         self.cn[state]=col_header
         
          if self.state ==1:
              for row in range(self.table_widget.rowCount()):
                  item = self.table_widget.item(row,self.c)
-                 item.setBackground(QColor(255, 0, 0)) 
-                 
-         if self.state ==2:
+                 item.setBackground(QColor(255, 0, 0,100)) 
+             self.state_name.setText("Max: "+chr(self.current[state]+65))
+             
+         elif self.state ==2:
             for row in range(self.table_widget.rowCount()):
                 item = self.table_widget.item(row,self.c)
-                item.setBackground(QColor(0, 255, 0)) 
+                item.setBackground(QColor(0, 255, 0,100)) 
+            self.state_name.setText("Lookup: "+chr(self.current[state]+65))
             
-         if self.state ==3:
+         elif self.state ==3:
+             
+             
+            self.start=self.c
             for row in range(self.table_widget.rowCount()):
                 item = self.table_widget.item(row,self.c)
-                item.setBackground(QColor(0, 0, 255)) 
+                item.setBackground(QColor(0, 0, 255,100)) 
             self.state=4
-            self.state_name.setText("range_e")
+            self.state_name.setText("range_s:e "+chr(self.current[state-1]+65)+" : "+chr(self.current[state]+65))
             
-         if self.state ==4:
+         elif self.state ==4:
            for row in range(self.table_widget.rowCount()):
-                item = self.table_widget.item(row,self.c)
-                item.setBackground(QColor(0, 0, 255)) 
+               for ra in range(self.start,self.c+1):
+                item = self.table_widget.item(row,ra)
+                item.setBackground(QColor(0, 0, 255,100)) 
            self.state =3
-           self.state_name.setText("range_s")
+           self.state_name.setText("range_s:e "+chr(self.current[state-1]+65)+" : "+chr(self.current[state]+65))
     def openDialog(self):
          dialog = Show_ex(self.path_input.text())
          result = dialog.exec_()
