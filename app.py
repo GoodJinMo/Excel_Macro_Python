@@ -8,12 +8,12 @@ from Nozzle_Max import NM_main
 from Graph_Rename import GR_main
 import style
 
-version="1.01.00v"
+version="1.01.00 v"
 class MyWindow(QMainWindow):
     
     def __init__(self):
        super().__init__()
-       self.setWindowTitle("Main")
+       self.setWindowTitle("Excel_Macro")
        self.setFixedSize(540, 960)
        self.second_window = None 
        
@@ -54,7 +54,8 @@ class MyWindow(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         jinmun=QLabel("JiMoo "+version,self)
-        jinmun.move(430,920)
+        jinmun.resize(230,50)
+        jinmun.move(400,920)
     def Open_exm(self):
          if self.second_window is None:  # 두 번째 창이 열려 있지 않으면
              self.second_window = exm_main()
