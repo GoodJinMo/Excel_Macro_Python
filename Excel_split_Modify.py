@@ -209,7 +209,7 @@ class exm_main(QMainWindow):
         if empty != "":
             for i in range(len(self.dataframes)):
                 for _ in range(int(empty)):
-                    self.dataframes[i] = self.dataframes[i].append(pd.Series(), ignore_index=True)
+                    self.dataframes[i] = pd.concat([self.dataframes[i], pd.Series()], ignore_index=True)
         merged_dataframe = pd.concat(self.dataframes, axis=0, ignore_index=True)
         merged_dataframe.to_excel("output.xlsx", index=False,header=False)
         
