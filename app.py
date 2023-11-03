@@ -62,7 +62,7 @@ class MyWindow(QMainWindow):
              self.second_window.show()
              self.second_window.closed.connect(self.second_window_closed)  # 두 번째 창 닫히는 이벤트 연결
     def Open_NM(self):
-         if self.second_window is None:  
+         if self.second_window is None: 
              self.second_window = NM_main()
              self.second_window.show()
              self.second_window.closed.connect(self.second_window_closed) 
@@ -71,6 +71,7 @@ class MyWindow(QMainWindow):
              self.second_window = GR_main()
              self.second_window.show()
              self.second_window.closed.connect(self.second_window_closed) 
+
     def second_window_closed(self):
         self.second_window = None  # 두 번째 창이 닫힐 때 self.second_window를 None으로 설정
 
