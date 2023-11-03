@@ -242,6 +242,8 @@ class  NM_main(QMainWindow):
          
          if self.folder_path:
              return self.folder_path
+    def closeEvent(self, event):
+        self.closed.emit()
 class Select_window(QDialog):
     def __init__(self):
         super().__init__()
@@ -274,7 +276,6 @@ class Select_window(QDialog):
         layout.addLayout(hlayout)
         layout.addLayout(hlayout3)
         self.setLayout(layout)
-    def closeEvent(self, event):
-        self.closed.emit()
+    
    
 
