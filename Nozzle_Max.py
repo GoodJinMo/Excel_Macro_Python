@@ -43,7 +43,6 @@ class  NM_main(QMainWindow):
         hlayout.addWidget(self.Max)
         hlayout.addWidget(self.Lookup_Max)
         hlayout.addWidget(self.Range)
-        self.Save_row_input = QLineEdit()
         
         
 
@@ -131,9 +130,9 @@ class  NM_main(QMainWindow):
             
          elif self.state ==4:
            for row in range(self.table_widget.rowCount()):
-               for ra in range(self.start,self.c+1):
+               for ra in range(self.start+1,self.c+1):
                 item = self.table_widget.item(row,ra)
-                item.setBackground(QColor(0, 0, 255,100)) 
+                item.setBackground(QColor(0, 0, 150,100)) 
            self.state =3
            self.state_name.setText("range_s:e "+chr(self.current[state-1]+65)+" : "+chr(self.current[state]+65))
     def openDialog(self):
@@ -150,7 +149,6 @@ class  NM_main(QMainWindow):
                 dp, ok = QInputDialog.getText(self, "Excel file name", "name:",text=dialog.value)
                 if ok:
                     self.dp=dp
-             print(self.sheet ,self.dprow ,  self.dp )
              self.open_new_window()
          else:
              print('Dialog canceled.')
@@ -197,7 +195,6 @@ class  NM_main(QMainWindow):
 
         self.dataframes = dfs[1:]
         self.update_table_widget()
-
     
     def update_table_widget(self):
         dataframe = self.dataframes[0]
@@ -219,31 +216,64 @@ class  NM_main(QMainWindow):
     
 
     def save_and_export(self):
-        file_name, ok = QInputDialog.getText(self, "Excel file name", "name:")
-        
-        if ok and file_name:       
-            cn=self.Save_row_input.text().split(",")
-            for i,n in enumerate(cn):
-                cn[i]=ord(n)-65
-            index_num=int(self.dprow)
-            modified_dataframe = self.dataframes[0].copy()
+        dialog = Select_window()
+        result = dialog.exec_()
+        if result == QDialog.Accepted:
+            file_name=self.chooseFolder()+"/"+dialog.file_name_input.text()+".xlsx"
+            cn=[ord(n)-65 for n in self.cn]
             n_df=pd.DataFrame()
          
             
             for i in range(len(self.dataframes)):
-                self.dataframes[i][cn[0]]=self.dataframes[i][cn[0]].fillna(0) ## null값 대체
-                numbers_only = [x for x in self.dataframes[i][cn[0]] if isinstance(x, (int, float))] ## 숫자값만 가져오기
+                self.dataframes[i].iloc[:,cn[0]]=self.dataframes[i].iloc[:,cn[0]].fillna(0) ## null값 대체
+                numbers_only = [x for x in self.dataframes[i].iloc[:,cn[0]] if isinstance(x, (int, float))] ## 숫자값만 가져오기
                 max_value = max(numbers_only) #최댓값 가져오기
-                step=self.dataframes[i][self.dataframes[i][cn[0]]==max_value][cn[1]].tolist()[0] #맥스값 행의 열값 가져오기
-                n_df=n_df.append(self.dataframes[i][self.dataframes[i][cn[2]]==step].loc[:, cn[2]+1:cn[3]])
+                step=self.dataframes[i][self.dataframes[i].iloc[:,cn[0]]==max_value].iloc[:,cn[1]].tolist()[0] #맥스값 행의 열값 가져오기
+                n_df = pd.concat([n_df, self.dataframes[i][self.dataframes[i].iloc[:, cn[2]] == step].iloc[:, cn[2] + 1:cn[3]+1]], ignore_index=True)
             
             try :
-                n_df.to_excel(f"{file_name}.xlsx", index=False,header=False)
-                QMessageBox.about(self,f'The file has been successfully saved to "{self.folder_path}".')
+                n_df.to_excel(file_name, index=False,header=False)
+                QMessageBox.about(self,"suc",f'The file has been successfully saved to "{self.folder_path}".')
             except Exception as e:
-                QMessageBox.about(self,f'Error Message:"{e}".')
+                QMessageBox.about(self,"fail",f'Error Message:"{e}".')
+    def chooseFolder(self):
+         options = QFileDialog.Options()
+         self.folder_path = QFileDialog.getExistingDirectory(self, "Choose Folder", options=options)
+         
+         if self.folder_path:
+             return self.folder_path
+class Select_window(QDialog):
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+        self.resize(400, 200)
+        self.setWindowTitle('Save')
+        
+        hlayout=QHBoxLayout()
+        self.file_name=QLabel("File_Name : ")
+        self.file_name_input=QLineEdit()
+        
+        hlayout.addWidget(self.file_name)
+        hlayout.addWidget(self.file_name_input)
         
         
+        ok_button = QPushButton('OK', self)
+        ok_button.clicked.connect(self.accept)
+
+        cancel_button = QPushButton('Cancel', self)
+        cancel_button.clicked.connect(self.reject)
+        
+        hlayout3 = QHBoxLayout()
+        hlayout3.addWidget(ok_button)
+        hlayout3.addWidget(cancel_button)
+        
+        layout=QVBoxLayout()
+        layout.addLayout(hlayout)
+        layout.addLayout(hlayout3)
+        self.setLayout(layout)
     def closeEvent(self, event):
         self.closed.emit()
    
