@@ -150,6 +150,8 @@ class exm_main(QMainWindow):
         for i in range(dataframe.shape[0]):
             for j in range(dataframe.shape[1]):
                 cell_value = str(dataframe.iloc[i, j])
+                if cell_value == "nan":
+                    cell_value = " "
                 self.table_widget.setItem(i, j, QTableWidgetItem(cell_value))
 
     def add_row(self):
@@ -189,18 +191,13 @@ class exm_main(QMainWindow):
     def save_and_export(self):
         sr = self.Save_row_input.text().split(",")
         empty = self.emp_input.text()
-        modified_dataframe = self.dataframes[0].copy()
         for i in range(self.table_widget.rowCount()):
             for j in range(self.table_widget.columnCount()):
-                cell_value = self.table_widget.item(i, j).text()
-                if cell_value == "nan":
-                    cell_value = ""
                 try:
-                    cell_value = float(cell_value)
+                    self.dataframes[0].iloc[i, j] = float(self.table_widget.item(i, j).text())
                 except:
-                    pass
-                modified_dataframe.iloc[i, j] = cell_value
-        self.dataframes[0] = modified_dataframe
+                    self.dataframes[0].iloc[i, j] = self.table_widget.item(i, j).text()
+                
         if sr[0] != '':
             for df in self.dataframes:
                 for i in sr:
@@ -209,7 +206,7 @@ class exm_main(QMainWindow):
         if empty != "":
             for i in range(len(self.dataframes)):
                 for _ in range(int(empty)):
-                    self.dataframes[i] = pd.concat([self.dataframes[i], pd.Series()], ignore_index=True)
+                    self.dataframes[i] = pd.concat([self.dataframes[i],pd.Series([None] * len(self.dataframes[i].columns), index=self.dataframes[i].columns).to_frame().T], ignore_index=True)
         merged_dataframe = pd.concat(self.dataframes, axis=0, ignore_index=True)
         merged_dataframe.to_excel("output.xlsx", index=False,header=False)
         
