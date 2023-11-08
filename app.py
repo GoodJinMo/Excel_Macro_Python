@@ -8,7 +8,7 @@ from Nozzle_Max import NM_main
 from Graph_Rename import GR_main
 import style
 
-version="1.01.02 v"
+version="1.01.03 v"
 class MyWindow(QMainWindow):
     
     def __init__(self):
