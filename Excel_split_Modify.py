@@ -189,56 +189,64 @@ class exm_main(QMainWindow):
         self.update_table_widget()
 
     def save_and_export(self):
-        sr = self.Save_row_input.text().split(",")
-        empty = self.emp_input.text()
-        for i in range(self.table_widget.rowCount()):
-            for j in range(self.table_widget.columnCount()):
-                try:
-                    self.dataframes[0].iloc[i, j] = float(self.table_widget.item(i, j).text())
-                except:
-                    self.dataframes[0].iloc[i, j] = self.table_widget.item(i, j).text()
-                
-        if sr[0] != '':
-            for df in self.dataframes:
-                for i in sr:
-                    df.loc[int(i)] = self.dataframes[0].loc[int(i)].values
-
-        if empty != "":
-            for i in range(len(self.dataframes)):
-                for _ in range(int(empty)):
-                    self.dataframes[i] = pd.concat([self.dataframes[i],pd.Series([None] * len(self.dataframes[i].columns), index=self.dataframes[i].columns).to_frame().T], ignore_index=True)
-        merged_dataframe = pd.concat(self.dataframes, axis=0, ignore_index=True)
-        merged_dataframe.to_excel("output.xlsx", index=False,header=False)
-        
-        wb = load_workbook("output.xlsx")
-        ws=wb.active
-        
-        if len(self.mg) != 0:
-            border_style = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-            for val,sr,sc,er,ec in self.mg:
-                num=[]
-                e=er-sr
-                for n in range(1,ws.max_row):
-                    if ws[f'{chr(64+sc)}{n}'].value == val:
-                          num.append(n)
-                for i in num:
-                    ws.merge_cells(start_row=i, start_column=sc, end_row=i+e, end_column=ec)
-                    for row in ws.iter_rows(min_row=i, min_col=sc, max_row=i+e, max_col=ec):
-                        for cell in row:
-                            cell.border = border_style
-                    ws[f'{chr(64+sc)}{i}'].alignment=Alignment(horizontal='center',vertical='center')
-            
-            for row_index, row in enumerate(ws.iter_rows(values_only=True), start=1):
-              for col_index, cell_value in enumerate(row, start=1):
-                  if cell_value is not None:
-                      cell = ws.cell(row=row_index, column=col_index)
-                  cell.border = border_style
-            
-            try :
-                wb.save("result.xlsx")
-                QMessageBox.about(self,f'The file has been successfully saved .')
+        dialog = Select_window()
+        result = dialog.exec_()
+        if result == QDialog.Accepted:
+            file_name=self.chooseFolder()+"/"+dialog.file_name_input.text()+".xlsx"
+            sr = self.Save_row_input.text().split(",")
+            empty = self.emp_input.text()
+            for i in range(self.table_widget.rowCount()):
+                for j in range(self.table_widget.columnCount()):
+                    try:
+                        self.dataframes[0].iloc[i, j] = float(self.table_widget.item(i, j).text())
+                    except:
+                        self.dataframes[0].iloc[i, j] = self.table_widget.item(i, j).text()
+                    
+            if sr[0] != '':
+                for df in self.dataframes:
+                    for i in sr:
+                        df.loc[int(i)] = self.dataframes[0].loc[int(i)].values
+    
+            if empty != "":
+                for i in range(len(self.dataframes)):
+                    for _ in range(int(empty)):
+                        self.dataframes[i] = pd.concat([self.dataframes[i],pd.Series([None] * len(self.dataframes[i].columns), index=self.dataframes[i].columns).to_frame().T], ignore_index=True)
+            merged_dataframe = pd.concat(self.dataframes, axis=0, ignore_index=True)
+            try:
+                merged_dataframe.to_excel(file_name, index=False,header=False)
+                QMessageBox.about(self,'suc',f'The file has been successfully saved .')
             except Exception as e:
-                QMessageBox.about(self,f'Error Message:"{e}".')
+                QMessageBox.about(self,'fail',f'Error Message:{e}.')
+            
+            wb = load_workbook(file_name)
+            ws=wb.active
+            
+            if len(self.mg) != 0:
+                border_style = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+                for val,sr,sc,er,ec in self.mg:
+                    num=[]
+                    e=er-sr
+                    for n in range(1,ws.max_row):
+                        if ws[f'{chr(64+sc)}{n}'].value == val:
+                              num.append(n)
+                    for i in num:
+                        ws.merge_cells(start_row=i, start_column=sc, end_row=i+e, end_column=ec)
+                        for row in ws.iter_rows(min_row=i, min_col=sc, max_row=i+e, max_col=ec):
+                            for cell in row:
+                                cell.border = border_style
+                        ws[f'{chr(64+sc)}{i}'].alignment=Alignment(horizontal='center',vertical='center')
+                
+                for row_index, row in enumerate(ws.iter_rows(values_only=True), start=1):
+                  for col_index, cell_value in enumerate(row, start=1):
+                      if cell_value is not None:
+                          cell = ws.cell(row=row_index, column=col_index)
+                      cell.border = border_style
+                
+                try :
+                    wb.save(file_name)
+                    QMessageBox.about(self,'suc',f'The file has been successfully saved .')
+                except Exception as e:
+                    QMessageBox.about(self,'fail',f'Error Message:{e}.')
                 
         
     def merge_st(self):
@@ -277,8 +285,44 @@ class exm_main(QMainWindow):
                 action = context_menu.exec_(self.mapToGlobal(event.pos()))
                 if action != None:
                     self.merge_en()
-
+    def chooseFolder(self):
+         options = QFileDialog.Options()
+         self.folder_path = QFileDialog.getExistingDirectory(self, "Choose Folder", options=options)
+         
+         if self.folder_path:
+             return self.folder_path
     def closeEvent(self, event):
         self.closed.emit()  # 창이 닫힐 때 'closed' Signal을 발생
 
+class Select_window(QDialog):
+    def __init__(self):
+        super().__init__()
 
+        self.initUI()
+
+    def initUI(self):
+        self.resize(400, 200)
+        self.setWindowTitle('Save')
+        
+        hlayout=QHBoxLayout()
+        self.file_name=QLabel("File_Name : ")
+        self.file_name_input=QLineEdit()
+        
+        hlayout.addWidget(self.file_name)
+        hlayout.addWidget(self.file_name_input)
+        
+        
+        ok_button = QPushButton('OK', self)
+        ok_button.clicked.connect(self.accept)
+
+        cancel_button = QPushButton('Cancel', self)
+        cancel_button.clicked.connect(self.reject)
+        
+        hlayout3 = QHBoxLayout()
+        hlayout3.addWidget(ok_button)
+        hlayout3.addWidget(cancel_button)
+        
+        layout=QVBoxLayout()
+        layout.addLayout(hlayout)
+        layout.addLayout(hlayout3)
+        self.setLayout(layout)
